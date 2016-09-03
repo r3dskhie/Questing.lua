@@ -13,7 +13,7 @@ local description = 'from PalletTown to Route 1'
 local dialogs = {
 	tree = Dialog:new({
 		"Select a Pokemon that has Headbutt."
-		headbutt = headbutt + 1
+		
 	})
 	
 }

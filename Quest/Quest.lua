@@ -7,10 +7,9 @@ local sys  = require "Libs/syslib"
 local game = require "Libs/gamelib"
 
 
-
 local Quest = {}
 
-function Quest:new(name, description, dialogs)
+function Quest:new(name, description, level, dialogs)
 	local o = {}
 	setmetatable(o, self)
 	self.__index     = self
@@ -53,10 +52,19 @@ function Quest:pokecenter(exitMapName) -- idealy make it work without exitMapNam
 	return moveToMap(exitMapName)
 end
 
+-- at a point in the game we'll always need to buy the same things
+-- use this function then
 
 function Quest:needPokecenter()
 	if getTeamSize() == 1 then
 		if getPokemonHealthPercent(1) <= 50 then
+			return true
+		end
+	-- else we would spend more time evolving the higher level ones
+	elseif not self:isTrainingOver() then
+		if getUsablePokemonCount() <= 1
+			or game.getUsablePokemonCountUnderLevel(self.level) == 0
+		then
 			return true
 		end
 	else
@@ -76,20 +84,26 @@ function Quest:message()
 	return self.name .. ': ' .. self.description
 end
 
--- I'll need a TeamManager class very soon
-
-
 
 function Quest:path()
 	if self.inBattle then
 		self.inBattle = false
 		self:battleEnd()
 	end
-	
+	if self:evolvePokemon() then
+		return true
+	end
+	if not isTeamSortedByLevelAscending() then
+		return sortTeamByLevelAscending()
+	end
+	if self:leftovers() then
+		return true
+	end
 	local mapFunction = self:mapToFunction()
 	assert(self[mapFunction] ~= nil, self.name .. " quest has no method for map: " .. getMapName())
 	self[mapFunction](self)
 end
+
 
 
 function Quest:battleBegin()
@@ -99,7 +113,23 @@ end
 function Quest:battleEnd()
 	self.canRun = true
 end
-
+function IsPokemonOnCaptureList()
+	result = false
+	if toCatch[1] ~= "" then
+	for i = 1, TableLength(toCatch), 1 do
+		if getOpponentName() == toCatch[i] then
+			result = true
+			break
+		end
+	end
+	end
+	return result
+end
+function TableLength(T)
+  local count = 0
+  for _ in pairs(T) do count = count + 1 end
+  return count
+end
 function Quest:wildBattle()
 	if isOpponentShiny() then
 		if useItem("Ultra Ball") or useItem("Great Ball") or useItem("Pokeball") then
@@ -109,26 +139,15 @@ function Quest:wildBattle()
 		if useItem("Ultra Ball") or useItem("Great Ball") or useItem("Pokeball") then
 			return true
 		end
+	elseif isPokemonOnCaptureList() then
+		if useItem("Ultra Ball") or useItem("Great Ball") or useItem("Pokeball") then
+			return true
+		end
 	end
 	
-	-- if we do not try to catch it
-	if getTeamSize() == 1 or getUsablePokemonCount() > 1 then
-		local opponentLevel = getOpponentLevel()
-		local myPokemonLvl  = getPokemonLevel(getActivePokemonNumber())
-		if opponentLevel >= myPokemonLvl then
-			local requestedId, requestedLevel = game.getMaxLevelUsablePokemon()
-			if requestedId ~= nil and requestedLevel > myPokemonLvl then
-				return sendPokemon(requestedId)
-			end
-		end
-		return attack() or sendUsablePokemon() or run() or sendAnyPokemon()
-	else
-		if not self.canRun then
-			return attack() or game.useAnyMove()
-		end
-		return run() or attack() or sendUsablePokemon() or sendAnyPokemon()
-	end
+	
 end
+
 
 function Quest:battle()
 	if not self.inBattle then
@@ -137,6 +156,8 @@ function Quest:battle()
 	end
 	if isWildBattle() then
 		return self:wildBattle()
+	else
+		return self:trainerBattle()
 	end
 end
 
@@ -156,11 +177,7 @@ end
 function Quest:battleMessage(message)
 	if sys.stringContains(message, "You can not run away!") then
 		sys.canRun = false
-	elseif sys.stringContains(message, "black out") and self.level < 100 and self:isTrainingOver() then
-		self.level = self.level + 1
-		self:startTraining()
-		log("Increasing " .. self.name .. " quest level to " .. self.level .. ". Training time!")
-		return true
+	
 	end
 	return false
 end

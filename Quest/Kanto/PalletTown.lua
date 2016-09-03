@@ -17,7 +17,7 @@ local dialogs = {
 	
 }
 
-local PalletTown = Quest:new()
+local PalletTownQuest = Quest:new()
 function PalletTownQuest:new()
 	return Quest.new(PalletTownQuest, name, description, _, dialogs)
 end

@@ -33,7 +33,7 @@ end
 function onPathAction()
 	questManager:path()
 	if questManager.isOver then
-		return fatal("No more quest to do. Script terminated.")
+		return fatal("---No more quest to do. Script terminated.---")
 	end
 end
 
@@ -43,7 +43,6 @@ end
 
 function onDialogMessage(message)
 	questManager:dialog(message)
-	headbutt = headbutt + 1
 end
 
 function onBattleMessage(message)

@@ -103,18 +103,4 @@ function QuestManager:battleMessage(message)
 	return self.selected:battleMessage(message)
 end
 
-function QuestManager:systemMessage(message)
-	if not self.selected then
-		return false
-	end
-	return self.selected:systemMessage(message)
-end
-
-function QuestManager:learningMove(moveName, pokemonIndex)
-	if not self:updateQuest() then
-		return false
-	end
-	return self.selected:learningMove(moveName, pokemonIndex)
-end
-
 return QuestManager

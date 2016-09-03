@@ -31,7 +31,7 @@ function Route1Quest:isDoable()
 end
 
 function Route1Quest:isDone()
-	return getMapName() == "Route 1"
+	return getMapName() == "Viridian City"
 end
 
 

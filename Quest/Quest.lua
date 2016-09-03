@@ -9,9 +9,7 @@ local game = require "Libs/gamelib"
 
 
 local Quest = {}
-function onStart()
-	headbutt = 0
-end
+
 function Quest:new(name, description, level, dialogs)
 	local o = {}
 	setmetatable(o, self)

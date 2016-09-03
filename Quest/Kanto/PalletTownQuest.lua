@@ -24,7 +24,7 @@ function PalletTownQuest:new()
 end
 
 function PalletTownQuest:isDoable()
-	if (isNpcOnCell(28, 22) or isNpcOnCell(27, 16)) and self:hasMap() then
+	if self:hasMap() then
 		return true
 	end
 	return false

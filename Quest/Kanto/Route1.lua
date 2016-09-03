@@ -83,5 +83,5 @@ function PalletTownQuest:battle()
 	end
 end
 
-return PalletTownQuest
+return Route1Quest
 

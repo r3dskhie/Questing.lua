@@ -10,7 +10,7 @@ local game = require "Libs/gamelib"
 
 local Quest = {}
 
-function Quest:new(name, description, level, dialogs)
+function Quest:new(name, description, dialogs)
 	local o = {}
 	setmetatable(o, self)
 	self.__index     = self
@@ -85,13 +85,6 @@ end
 function Quest:needPokecenter()
 	if getTeamSize() == 1 then
 		if getPokemonHealthPercent(1) <= 50 then
-			return true
-		end
-	-- else we would spend more time evolving the higher level ones
-	elseif not self:isTrainingOver() then
-		if getUsablePokemonCount() <= 1
-			or game.getUsablePokemonCountUnderLevel(self.level) == 0
-		then
 			return true
 		end
 	else

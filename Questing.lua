@@ -7,7 +7,7 @@ name = "Questing"
 author = "g0ld"
 description = [[Everything.]]
 
-dofile "config.lua"
+
 
 local QuestManager
 local questManager = nil

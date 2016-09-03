@@ -53,34 +53,6 @@ function Quest:pokecenter(exitMapName) -- idealy make it work without exitMapNam
 	return moveToMap(exitMapName)
 end
 
--- at a point in the game we'll always need to buy the same things
--- use this function then
-function Quest:pokemart(exitMapName)
-	local pokeballCount = getItemQuantity("Pokeball")
-	local money         = getMoney()
-	if money >= 200 and pokeballCount < 50 then
-		if not isShopOpen() then
-			return talkToNpcOnCell(3,5)
-		else
-			local pokeballToBuy = 50 - pokeballCount
-			local maximumBuyablePokeballs = money / 200
-			if maximumBuyablePokeballs < pokeballToBuy then
-				pokeballToBuy = maximumBuyablePokeballs
-			end
-			return buyItem("Pokeball", pokeballToBuy)
-		end
-	else
-		return moveToMap(exitMapName)
-	end
-end
-
-function Quest:needPokemart()
-	-- TODO: ItemManager
-	if getItemQuantity("Pokeball") < 50 and getMoney() >= 200 then
-		return true
-	end
-	return false
-end
 
 function Quest:needPokecenter()
 	if getTeamSize() == 1 then

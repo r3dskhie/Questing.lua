@@ -11,127 +11,67 @@ local name        = 'PalletTown'
 local description = 'from PalletTown to Route 1'
 
 local dialogs = {
-	mom = Dialog:new({
-		"Remember that I love you", -- REMEMBER THAT, OKAY?!
-		"glad that you dropped by"
-	}),
-	oak = Dialog:new({
-		"but you can have one",
-		"which pokemon do you want"
-	}),
-	bulbasaur = Dialog:new({
-		"grass type Pokemon Bulbasaur",
-	}),
-	charmander = Dialog:new({
-		"fire type Pokemon Charmander",
-	}),
-	squirtle = Dialog:new({
-		"water type Pokemon Squirtle",
+	tree = Dialog:new({
+		"Select a Pokemon that has Headbutt."
 	})
+	
 }
 
-local PalletStartQuest = Quest:new()
-function PalletStartQuest:new()
-	return Quest.new(PalletStartQuest, name, description, _, dialogs)
+local PalletTown = Quest:new()
+function PalletTownQuest:new()
+	return Quest.new(PalletTownQuest, name, description, _, dialogs)
 end
 
-function PalletStartQuest:isDoable()
-	if not hasItem("Boulder Badge") and self:hasMap() then
+function PalletTownQuest:isDoable()
+	if (isNpcOnCell(28, 22) or isNpcOnCell(27, 16)) and self:hasMap() then
 		return true
 	end
 	return false
 end
 
-function PalletStartQuest:isDone()
+function PalletTownQuest:isDone()
 	return getMapName() == "Route 1"
 end
 
-function PalletStartQuest:PlayerBedroomPallet()
-	if getTeamSize() == 0 or hasItem("Pokeball") then
-		return moveToMap("Player House Pallet")
+
+function PalletTownQuest:PalletTown()
+	if isNpcOnCell(28, 22) then
+  		pushDialogAnswer(butter)
+		log("---Headbutting 1st tree---")
+		return talkToNpcOnCell(28, 22)	--Tree 1
+	elseif isNpcOnCell(27, 16) then
+		pushDialogAnswer(butter)
+		log("---Headbutting 2nd tree---")
+		return talkToNpcOnCell(27, 16)	--Tree 2
+	elseif isNpcOnCell(20, 7) then
+		pushDialogAnswer(butter)
+		log("---Headbutting 3rd tree---")
+		return talkToNpcOnCell(20, 7)	--Tree 3
+	elseif isNpcOnCell(8, 5) then
+		pushDialogAnswer(butter)
+		log("---Headbutting 4th tree---")
+		return talkToNpcOnCell(8, 5)	--Tree 4
+	elseif isNpcOnCell(4, 7) then
+		pushDialogAnswer(butter)
+		log("---Headbutting 5th tree---")
+		return talkToNpcOnCell(4, 7)	--Tree 5
+	elseif isNpcOnCell(13, 17) then
+		pushDialogAnswer(butter)
+		log("---Headbutting Last tree---")
+		return talkToNpcOnCell(13, 17)	--Tree 6
 	else
-		if isNpcOnCell(7,3) then
-			return talkToNpcOnCell(7,3)
-		elseif isNpcOnCell(6,3) then
-			return talkToNpcOnCell(6,3)
-		else
-			error("No Pokeball in 'Player Bedroom Pallet' nor in bag")
-		end
+	log("---"..getMapName().." Cleared... Moving to next Map---")
+		moveToMap("Route 1")
 	end
 end
 
-function PalletStartQuest:PlayerHousePallet()
-	if getTeamSize() == 0 or hasItem("Pokeball") then
-		return moveToMap("Link")
+function PalletTownQuest:battle()
+	if getOpponentName() == "Charmander" or getOpponentName() == "Bulbasaur" or getOpponentName() == "Squirtle" or getOpponentName() == "Murkrow" then
+
+		return useItem("Pokeball") or useItem("Ultra Ball") or useItem("Great Ball") or sendAnyPokemon() or run()
 	else
-		if self.dialogs.mom.state == false then
-			return talkToNpcOnCell(7,6)
-		else
-			return moveToMap("Player Bedroom Pallet")
-		end
+		return run() or sendAnyPokemon()
 	end
 end
 
-function PalletStartQuest:PalletTown()
-	if getTeamSize() == 0 then
-		return moveToMap("Oaks Lab")
-	elseif not hasItem("Pokeball") then
-		return moveToMap("Player House Pallet")
-	else
-		if isNpcVisible("#133") then
-			return talkToNpc("#133")
-		elseif isNpcVisible("Jackson") then
-			return talkToNpc("Jackson")
-		else
-			return moveToMap("Route 1")
-		end
-	end
-end
-
-function PalletStartQuest:OaksLab()
-	if getTeamSize() == 0 then
-		if self.dialogs.oak.state == false then
-			return talkToNpcOnCell(7,4) -- Oak
-		else
-			if KANTO_STARTER_ID == 1 then
-				return talkToNpcOnCell(9,6)  -- bulbasaur
-			elseif KANTO_STARTER_ID == 2 then
-				return talkToNpcOnCell(10,6) -- charmander
-			elseif KANTO_STARTER_ID == 3 then
-				return talkToNpcOnCell(11,6) -- squirtle
-			elseif KANTO_STARTER_ID == 4 then
-				if not self.dialogs.bulbasaur.state then
-					pushDialogAnswer(2)
-					return talkToNpcOnCell(9,6)  -- bulbasaur
-				elseif not self.dialogs.charmander.state then
-					pushDialogAnswer(2)
-					return talkToNpcOnCell(10,6) -- charmander
-				elseif not self.dialogs.squirtle.state then
-					pushDialogAnswer(2)
-					return talkToNpcOnCell(11,6) -- squirtle
-				else
-					return talkToNpcOnCell(9,2) -- pikachu
-				end
-			else
-				return fatal("undefined KANTO_STARTER_ID")
-			end
-		end
-	else
-		if not hasItem("Pokedex") then
-			return talkToNpcOnCell(7,4) -- Oak
-		else
-			return moveToMap("Link")
-		end
-	end
-end
-
-function PalletStartQuest:battle()
-	if getPokemonHealthPercent(1) < 50 then
-		if useItemOnPokemon("Potion", 1) then
-			return true
-		end
-	end
-	return attack()
-end
-
-return PalletStartQuest
+return PalletTownQuest

@@ -12,7 +12,7 @@ local Route1Quest    = require('Quests/Kanto/Route1Quest')
 
 local quests = {
 
-	PalletTownQuest:new()
+	PalletTownQuest:new(),
 	Route1Quest:new()
 
 }

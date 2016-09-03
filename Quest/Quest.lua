@@ -6,7 +6,7 @@
 local sys  = require "Libs/syslib"
 local game = require "Libs/gamelib"
 
-local blacklist = require "blacklist"
+
 
 local Quest = {}
 
@@ -16,9 +16,7 @@ function Quest:new(name, description, level, dialogs)
 	self.__index     = self
 	o.name        = name
 	o.description = description
-	o.level       = level or 1
 	o.dialogs     = dialogs
-	o.training    = true
 	return o
 end
 
@@ -76,47 +74,6 @@ function Quest:pokemart(exitMapName)
 	end
 end
 
-function Quest:isTrainingOver()
-	if game.minTeamLevel() >= self.level then
-		if self.training then -- end the training
-			self:stopTraining()
-		end
-		return true
-	end
-	return false
-end
-
-function Quest:leftovers()
-	ItemName = "Leftovers"
-	local PokemonNeedLeftovers = game.getFirstUsablePokemon()
-	local PokemonWithLeftovers = game.getPokemonIdWithItem(ItemName)
-	
-	if PokemonWithLeftovers > 0 then
-		if PokemonNeedLeftovers == PokemonWithLeftovers  then
-			return false -- now leftovers is on rightpokemon
-		else
-			takeItemFromPokemon(PokemonWithLeftovers)
-			return true
-		end
-	else
-		if hasItem(ItemName) then
-			giveItemToPokemon(ItemName,PokemonNeedLeftovers)
-			return true
-		else
-			return false-- don't have leftovers in bag and is not on pokemons
-		end
-	end
-end
-
-function Quest:startTraining()
-	self.training = true
-end
-
-function Quest:stopTraining()
-	self.training = false
-	self.healPokemonOnceTrainingIsOver = true
-end
-
 function Quest:needPokemart()
 	-- TODO: ItemManager
 	if getItemQuantity("Pokeball") < 50 and getMoney() >= 200 then
@@ -155,50 +112,20 @@ function Quest:message()
 end
 
 -- I'll need a TeamManager class very soon
-local moonStoneTargets = {
-	"Clefairy",
-	"Jigglypuff",
-	"Munna",
-	"Nidorino",
-	"Nidorina",
-	"Skitty"
-}
 
-function Quest:evolvePokemon()
-	local hasMoonStone = hasItem("Moon Stone")
-	for pokemonId=1, getTeamSize(), 1 do
-		local pokemonName = getPokemonName(pokemonId)
-		if hasMoonStone
-			and sys.tableHasValue(moonStoneTargets, pokemonName)
-		then
-			return useItemOnPokemon("Moon Stone", pokemonId)
-		end
-	end
-	return false
-end
+
 
 function Quest:path()
 	if self.inBattle then
 		self.inBattle = false
 		self:battleEnd()
 	end
-	if self:evolvePokemon() then
-		return true
-	end
-	if not isTeamSortedByLevelAscending() then
-		return sortTeamByLevelAscending()
-	end
-	if self:leftovers() then
-		return true
-	end
+	
 	local mapFunction = self:mapToFunction()
 	assert(self[mapFunction] ~= nil, self.name .. " quest has no method for map: " .. getMapName())
 	self[mapFunction](self)
 end
 
-function Quest:isPokemonBlacklisted(pokemonName)
-	return sys.tableHasValue(blacklist, pokemonName)
-end
 
 function Quest:battleBegin()
 	self.canRun = true
@@ -238,15 +165,6 @@ function Quest:wildBattle()
 	end
 end
 
-function Quest:trainerBattle()
-	-- bug: if last pokemons have only damaging but type ineffective
-	-- attacks, then we cannot use the non damaging ones to continue.
-	if not self.canRun then -- trying to switch while a pokemon is squeezed end up in an infinity loop
-		return attack() or game.useAnyMove()
-	end
-	return attack() or sendUsablePokemon() or sendAnyPokemon() -- or game.useAnyMove()
-end
-
 function Quest:battle()
 	if not self.inBattle then
 		self.inBattle = true
@@ -254,8 +172,6 @@ function Quest:battle()
 	end
 	if isWildBattle() then
 		return self:wildBattle()
-	else
-		return self:trainerBattle()
 	end
 end
 
@@ -288,14 +204,5 @@ function Quest:systemMessage(message)
 	return false
 end
 
-local hmMoves = {
-	"cut",
-	"surf",
-	"flash"
-}
-
-function Quest:learningMove(moveName, pokemonIndex)
-	return forgetAnyMoveExcept(hmMoves)
-end
 
 return Quest

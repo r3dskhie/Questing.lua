@@ -70,7 +70,7 @@ function Route1Quest:Route1()
 		return talkToNpcOnCell(28,43)	--Tree 8
 	else
 	log("---"..getMapName().." Cleared... Moving to next Map---")
-		moveToMap("Route 1 Stop House")
+		moveToMap("Viridian City")
 	end
 end
 

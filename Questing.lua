@@ -43,6 +43,7 @@ end
 
 function onDialogMessage(message)
 	questManager:dialog(message)
+	headbutt = headbutt + 1
 end
 
 function onBattleMessage(message)
